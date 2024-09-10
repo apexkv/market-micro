@@ -1,0 +1,174 @@
+name: market-micro
+
+services:
+    users:
+        build:
+            context: ./users
+            dockerfile: Dockerfile
+        restart: always
+        env_file:
+            - ./users/.env
+        ports:
+            - 8010:8000
+        volumes:
+            - ./users:/app
+        depends_on:
+            - users-db
+            - rabbitmq
+        networks:
+            - public-network
+            - private-network
+            - users-network
+
+    users-db:
+        image: mysql:8.4.0
+        restart: always
+        env_file:
+            - ./users/.env
+        volumes:
+            - users-db:/var/lib/mysql
+        networks:
+            - users-network
+
+    admin:
+        build:
+            context: ./admin
+            dockerfile: Dockerfile
+        restart: always
+        env_file:
+            - ./admin/.env
+        ports:
+            - 8010:8000
+        volumes:
+            - ./admin:/app
+        depends_on:
+            - admin-db
+            - rabbitmq
+        networks:
+            - public-network
+            - private-network
+            - admin-network
+
+    admin-db:
+        image: mysql:8.4.0
+        restart: always
+        env_file:
+            - ./admin/.env
+        volumes:
+            - admin-db:/var/lib/mysql
+        networks:
+            - admin-network
+
+    cart:
+        build:
+            context: ./cart
+            dockerfile: Dockerfile
+        restart: always
+        env_file:
+            - ./cart/.env
+        ports:
+            - 8010:8000
+        volumes:
+            - ./cart:/app
+        depends_on:
+            - cart-db
+            - rabbitmq
+        networks:
+            - public-network
+            - private-network
+            - cart-network
+
+    cart-db:
+        image: mysql:8.4.0
+        restart: always
+        env_file:
+            - ./cart/.env
+        volumes:
+            - cart-db:/var/lib/mysql
+        networks:
+            - cart-network
+
+    order:
+        build:
+            context: ./order
+            dockerfile: Dockerfile
+        restart: always
+        env_file:
+            - ./order/.env
+        ports:
+            - 8010:8000
+        volumes:
+            - ./order:/app
+        depends_on:
+            - order-db
+            - rabbitmq
+        networks:
+            - public-network
+            - private-network
+            - order-network
+
+    order-db:
+        image: mysql:8.4.0
+        restart: always
+        env_file:
+            - ./order/.env
+        volumes:
+            - order-db:/var/lib/mysql
+        networks:
+            - order-network
+
+    product:
+        build:
+            context: ./product
+            dockerfile: Dockerfile
+        restart: always
+        env_file:
+            - ./product/.env
+        ports:
+            - 8010:8000
+        volumes:
+            - ./product:/app
+        depends_on:
+            - order-db
+            - rabbitmq
+        networks:
+            - public-network
+            - private-network
+            - product-network
+
+    product-db:
+        image: mysql:8.4.0
+        restart: always
+        env_file:
+            - ./product/.env
+        volumes:
+            - product-db:/var/lib/mysql
+        networks:
+            - product-network
+
+    rabbitmq:
+        restart: always
+        image: rabbitmq:3-management
+        ports:
+            - 5672:5672
+            - 15672:15672
+        env_file:
+            - ./.env
+        networks:
+            - private-network
+
+volumes:
+    users-db:
+    admin-db:
+    cart-db:
+    order-db:
+    product-db:
+
+networks:
+    public-network:
+    private-network:
+    users-network:
+    admin-network:
+    cart-network:
+    order-network:
+    product-network:
